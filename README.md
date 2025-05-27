@@ -10,10 +10,10 @@ Este projeto implementa uma arquitetura de microsserviços com os seguintes comp
 - **Catalog.API** - Gerenciamento de catálogo de produtos ✅
 - **Inventory.API** - Controle de estoque ✅
 - **Order.API** - Processamento de pedidos ✅
-- **Identity.API** - Autenticação e autorização (em desenvolvimento)
+- **Identity.API** - Autenticação e autorização ✅
 
 ### Infraestrutura
-- **API Gateway** - Ponto de entrada único (em desenvolvimento)
+- **API Gateway** - Ponto de entrada único com Ocelot ✅
 - **SQL Server** - Banco de dados relacional
 - **Docker** - Containerização
 - **Azure DevOps** - CI/CD (planejado)
@@ -48,10 +48,12 @@ cd CommerceEngine
 docker-compose up -d
 
 # As APIs estarão disponíveis em:
+# - API Gateway: http://localhost:5000
 # - Catalog API: http://localhost:5001
 # - Inventory API: http://localhost:5002
 # - Order API: http://localhost:5003
-# - Swagger UIs: http://localhost:5001, http://localhost:5002 e http://localhost:5003
+# - Identity API: http://localhost:5004
+# - Swagger UIs: http://localhost:5000/swagger, http://localhost:5001, http://localhost:5002, http://localhost:5003 e http://localhost:5004
 ```
 
 ### Opção 2: Execução Local
@@ -73,6 +75,27 @@ dotnet run
 ```
 
 ## 📚 Endpoints da API
+
+### API Gateway (Porta 5000)
+
+O API Gateway usando Ocelot atua como ponto de entrada único para todos os microsserviços:
+
+| Rota Original | Rota no Gateway | Descrição |
+|---------------|-----------------|-----------|
+| `http://localhost:5001/api/products` | `http://localhost:5000/api/catalog/products` | Catalog API |
+| `http://localhost:5002/api/inventory` | `http://localhost:5000/api/inventory` | Inventory API |
+| `http://localhost:5003/api/orders` | `http://localhost:5000/api/orders` | Order API |
+| `http://localhost:5004/api/auth` | `http://localhost:5000/api/auth` | Identity API |
+| `http://localhost:5004/api/users` | `http://localhost:5000/api/users` | User Management |
+
+**Funcionalidades do Gateway:**
+- ✅ Roteamento inteligente para microsserviços
+- ✅ Autenticação JWT centralizada
+- ✅ Rate limiting configurável
+- ✅ Logging e monitoramento
+- ✅ CORS configurado
+- ✅ Swagger UI integrado
+- ✅ Load balancing (preparado)
 
 ### Catalog API
 
@@ -161,8 +184,20 @@ CommerceEngine/
 │   │   │   ├── Data/
 │   │   │   ├── Mappings/
 │   │   │   └── Dockerfile
-│   │   └── Identity.API/ (planejado)
-│   └── ApiGateway/ (planejado)
+│   │   └── Identity.API/
+│   │       ├── Controllers/
+│   │       ├── Models/
+│   │       ├── DTOs/
+│   │       ├── Services/
+│   │       ├── Data/
+│   │       ├── Mappings/
+│   │       └── Dockerfile
+│   └── ApiGateway/
+│       ├── Controllers/
+│       ├── ocelot.json
+│       ├── ocelot.Development.json
+│       ├── Program.cs
+│       └── Dockerfile
 ├── docker/
 ├── k8s/
 ├── tests/
@@ -185,11 +220,14 @@ dotnet test --filter Category=Integration
 1. ✅ Implementar Catalog.API
 2. ✅ Implementar Inventory.API
 3. ✅ Implementar Order.API
-4. 🔄 Implementar Identity.API
-5. 🔄 Implementar API Gateway
+4. ✅ Implementar Identity.API
+5. ✅ Implementar API Gateway
 6. 🔄 Configurar CI/CD no Azure DevOps
 7. 🔄 Implementar testes automatizados
 8. 🔄 Deploy no Azure
+9. 🔄 Implementar Service Discovery
+10. 🔄 Adicionar Circuit Breaker
+11. 🔄 Implementar Distributed Tracing
 
 ## 🤝 Contribuição
 

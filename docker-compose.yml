@@ -85,6 +85,27 @@ services:
     networks:
       - commerce-network
 
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: src/ApiGateway/Dockerfile
+    container_name: api-gateway
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Key=CommerceEngine_SuperSecretKey_2025_Identity_JWT_Token_Signing_Key_Must_Be_At_Least_256_Bits
+      - Jwt__Issuer=CommerceEngine.Identity
+      - Jwt__Audience=CommerceEngine.APIs
+    ports:
+      - "5000:80"
+    depends_on:
+      - catalog-api
+      - inventory-api
+      - order-api
+      - identity-api
+    networks:
+      - commerce-network
+
 volumes:
   sqlserver_data:
 
