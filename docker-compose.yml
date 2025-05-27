@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # SQL Server
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: commerce-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=CommerceEngine123!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - commerce-network
+
+  # Catalog API
+  catalog-api:
+    build:
+      context: ./src/Services/Catalog.API
+      dockerfile: Dockerfile
+    container_name: catalog-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=CommerceEngine.Catalog;User Id=sa;Password=CommerceEngine123!;TrustServerCertificate=true
+    ports:
+      - "5001:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - commerce-network
+
+  # Inventory API
+  inventory-api:
+    build:
+      context: ./src/Services/Inventory.API
+      dockerfile: Dockerfile
+    container_name: inventory-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=CommerceEngine.Inventory;User Id=sa;Password=CommerceEngine123!;TrustServerCertificate=true
+    ports:
+      - "5002:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - commerce-network
+
+  # Order API
+  order-api:
+    build:
+      context: ./src/Services/Order.API
+      dockerfile: Dockerfile
+    container_name: order-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=CommerceEngine.Order;User Id=sa;Password=CommerceEngine123!;TrustServerCertificate=true
+    ports:
+      - "5003:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - commerce-network
+
+  # Identity API
+  identity-api:
+    build:
+      context: .
+      dockerfile: src/Services/Identity.API/Dockerfile
+    container_name: identity-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=CommerceEngine.Identity;User Id=sa;Password=CommerceEngine123!;TrustServerCertificate=true
+      - Jwt__Key=CommerceEngine_SuperSecretKey_2025_Identity_JWT_Token_Signing_Key_Must_Be_At_Least_256_Bits
+      - Jwt__Issuer=CommerceEngine.Identity
+      - Jwt__Audience=CommerceEngine.APIs
+      - Jwt__ExpiryInMinutes=15
+      - Jwt__RefreshTokenExpiryInDays=7
+    ports:
+      - "5004:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - commerce-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  commerce-network:
+    driver: bridge 
